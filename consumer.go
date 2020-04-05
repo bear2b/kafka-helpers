@@ -22,7 +22,6 @@ type Consumer struct {
 	Brokers  string
 	ClientID string
 	Group    string
-	// ready    chan bool
 	Ctx      context.Context
 	client   sarama.ConsumerGroup
 	handlers map[string]ConsumerHandlerFunc
@@ -54,7 +53,6 @@ func (consumer *Consumer) Run() {
 		log.Panicf("Error creating consumer group client: %v", err)
 	}
 	consumer.client = client
-	// consumer.ready = make(chan bool)
 
 	for {
 		if err := client.Consume(consumer.Ctx, topics, consumer); err != nil {
@@ -64,8 +62,6 @@ func (consumer *Consumer) Run() {
 		if consumer.Ctx.Err() != nil {
 			return
 		}
-		log.Println("in the main loop...")
-		// consumer.ready = make(chan bool)
 	}
 }
 
@@ -79,8 +75,6 @@ func (consumer *Consumer) AddHandler(topic string, handler ConsumerHandlerFunc) 
 
 // Setup is run at the beginning of a new session, before ConsumeClaim
 func (consumer *Consumer) Setup(sarama.ConsumerGroupSession) error {
-	// Mark the consumer as ready
-	// close(consumer.ready)
 	return nil
 }
 
