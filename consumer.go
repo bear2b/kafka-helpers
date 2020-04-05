@@ -19,11 +19,11 @@ type ConsumerHandlerFunc func(context.Context, IncomingMessage) bool
 
 // Consumer represents a Sarama consumer group consumer
 type Consumer struct {
-	brokers  string
-	clientID string
-	group    string
+	Brokers  string
+	ClientID string
+	Group    string
 	// ready    chan bool
-	ctx      context.Context
+	Ctx      context.Context
 	client   sarama.ConsumerGroup
 	handlers map[string]ConsumerHandlerFunc
 }
@@ -44,12 +44,12 @@ func (consumer *Consumer) Run() {
 
 	config := sarama.NewConfig()
 	config.Version, _ = sarama.ParseKafkaVersion("2.1.1")
-	config.ClientID = consumer.clientID
+	config.ClientID = consumer.ClientID
 	config.Consumer.Return.Errors = true
 	config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
 
-	client, err := sarama.NewConsumerGroup(strings.Split(consumer.brokers, ","), consumer.group, config)
+	client, err := sarama.NewConsumerGroup(strings.Split(consumer.Brokers, ","), consumer.Group, config)
 	if err != nil {
 		log.Panicf("Error creating consumer group client: %v", err)
 	}
@@ -57,11 +57,11 @@ func (consumer *Consumer) Run() {
 	// consumer.ready = make(chan bool)
 
 	for {
-		if err := client.Consume(consumer.ctx, topics, consumer); err != nil {
+		if err := client.Consume(consumer.Ctx, topics, consumer); err != nil {
 			log.Panicf("Error from consumer: %v", err)
 		}
 		// check if context was cancelled, signaling that the consumer should stop
-		if consumer.ctx.Err() != nil {
+		if consumer.Ctx.Err() != nil {
 			return
 		}
 		log.Println("in the main loop...")
@@ -94,7 +94,7 @@ func (consumer *Consumer) Cleanup(sarama.ConsumerGroupSession) error {
 func (consumer *Consumer) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for message := range claim.Messages() {
 		session.MarkMessage(message, "")
-		consumer.handlers[claim.Topic()](consumer.ctx, IncomingMessage{Topic: message.Topic, Value: string(message.Value)})
+		consumer.handlers[claim.Topic()](consumer.Ctx, IncomingMessage{Topic: message.Topic, Value: string(message.Value)})
 	}
 	return nil
 }
