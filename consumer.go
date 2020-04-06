@@ -15,7 +15,7 @@ type IncomingMessage struct {
 }
 
 // ConsumerHandlerFunc will be called to process a message
-type ConsumerHandlerFunc func(context.Context, IncomingMessage) bool
+type ConsumerHandlerFunc func(context.Context, IncomingMessage)
 
 // Consumer represents a Sarama consumer group consumer
 type Consumer struct {
